@@ -4,7 +4,7 @@ import colors from '../styles/colors';
 
 export default function QuoteScreen() {
   return <View style={styles.container}>
-    <Text style={styles.title}>Cytat</Text>
+    <Text style={styles.title}>Potrząśnij, aby wylosować cytat</Text>
   </View>;
 }
 
