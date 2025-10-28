@@ -4,12 +4,29 @@ import colors from '../styles/colors';
 
 export default function OptionsScreen({ navigation }) {
   return <View style={styles.container}>
-    <Text style={styles.title}>Opcje</Text>
-    <Button
-                color={colors.accent}
-                title="Powrót" 
-                onPress={() => navigation.navigate('Home')}
-              />
+    <Text style={styles.title}>Ustawienia</Text>
+    <View style={styles.buttonContainer}>
+      <Button
+        color={colors.accent}
+        title="Zmień hasło"
+        onPress={() => {}}
+      />
+    </View>
+    <View style={styles.buttonContainer}>
+      <Button
+        color={colors.accent}
+        title="Zmień motyw kolorów"
+        onPress={() => {}}
+      />
+    </View>
+    <View style={styles.buttonContainer}>
+      <Button
+        color={colors.accent}
+        title="Powrót" 
+        onPress={() => navigation.navigate('Home')}
+      />
+    </View>
+    
   </View>;
 }
 
@@ -25,5 +42,8 @@ const styles = StyleSheet.create({
       fontSize: 24,
       textAlign: 'center',
       marginBottom: 20,
+    },
+    buttonContainer: {
+      padding: 10,
     }
 });

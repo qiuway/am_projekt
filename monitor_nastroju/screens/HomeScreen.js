@@ -9,7 +9,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Wpisy" 
-          onPress={() => navigation.replace('Entry')} 
+          onPress={() => navigation.navigate('Entry')} 
         />
       </View>
 
@@ -17,7 +17,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Statystyki" 
-          onPress={() => navigation.replace('Statistics')}
+          onPress={() => navigation.navigate('Statistics')}
         />
       </View>
 
@@ -25,7 +25,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Medytacja" 
-          onPress={() => navigation.replace('Meditation')} 
+          onPress={() => navigation.navigate('Meditation')} 
         />
       </View>
 
@@ -33,7 +33,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Galeria" 
-          onPress={() => navigation.replace('Gallery')} 
+          onPress={() => navigation.navigate('Gallery')} 
         />
       </View>
 
@@ -41,7 +41,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Cytat na dziś" 
-          onPress={() => navigation.replace('Quote')} 
+          onPress={() => navigation.navigate('Quote')} 
         />
       </View>
 
@@ -49,7 +49,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Ustawienia"
-          onPress={() => navigation.replace('Options')}
+          onPress={() => navigation.navigate('Options')}
         />
       </View>
     </View>
