@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Button, Text, StyleSheet } from 'react-native';
 import colors from '../styles/colors';
 
-export default function MeditationScreen() {
+export default function MeditationScreen({ navigation }) {
   return <View style={styles.container}>
     <Text style={styles.title}>Medytacja</Text>
+    <Button
+                color={colors.accent}
+                title="Powrót" 
+                onPress={() => navigation.navigate('Home')}
+              />
   </View>;
 }
 
