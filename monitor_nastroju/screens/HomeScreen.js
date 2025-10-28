@@ -5,41 +5,53 @@ import colors from '../styles/colors';
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Button
-        color={colors.accent}
-        title="Wpisy" 
-        onPress={() => navigation.replace('Entry')} 
-      />
-      <View style={{ height: 20 }} />
-      <Button
-        color={colors.accent}
-        title="Statystyki" 
-        onPress={() => navigation.replace('Statistics')}
-      />
-      <View style={{ height: 20 }} />
-      <Button
-        color={colors.accent}
-        title="Medytacja" 
-        onPress={() => navigation.replace('Meditation')} 
-      />
-      <View style={{ height: 20 }} />
-      <Button
-        color={colors.accent}
-        title="Galeria" 
-        onPress={() => navigation.replace('Gallery')} 
-      />
-      <View style={{ height: 20 }} />
-      <Button
-        color={colors.accent}
-        title="Cytat na dziś" 
-        onPress={() => navigation.replace('Quote')} 
-      />
-      <View style={{ height: 20 }} />
-      <Button
-        color={colors.accent}
-        title="Ustawienia"
-        onPress={() => navigation.replace('Options')}
-      />
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Wpisy" 
+          onPress={() => navigation.replace('Entry')} 
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Statystyki" 
+          onPress={() => navigation.replace('Statistics')}
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Medytacja" 
+          onPress={() => navigation.replace('Meditation')} 
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Galeria" 
+          onPress={() => navigation.replace('Gallery')} 
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Cytat na dziś" 
+          onPress={() => navigation.replace('Quote')} 
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          color={colors.accent}
+          title="Ustawienia"
+          onPress={() => navigation.replace('Options')}
+        />
+      </View>
     </View>
   );
 }
@@ -51,5 +63,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  buttonContainer: {
+    marginVertical: 10,
+  },
 });
-
