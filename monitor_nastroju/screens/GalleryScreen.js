@@ -22,7 +22,7 @@ export default function GalleryScreen({ navigation }) {
         <Button
           color={colors.accent}
           title="Powrót do menu"
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.goBack()}
         />
       </View>
     </View>

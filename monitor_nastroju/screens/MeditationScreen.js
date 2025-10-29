@@ -8,7 +8,7 @@ export default function MeditationScreen({ navigation }) {
     <Button
                 color={colors.accent}
                 title="Powrót" 
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.goBack()}
               />
   </View>;
 }
