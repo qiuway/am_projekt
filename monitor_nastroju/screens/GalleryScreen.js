@@ -6,7 +6,6 @@ export default function GalleryScreen({ navigation }) {
   const fakeImages = Array.from({ length: 20 }, (_, i) => i + 1);
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Galeria</Text>
 
       <ScrollView>
         <View style={styles.grid}>
@@ -18,13 +17,7 @@ export default function GalleryScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      <View style={{paddingVertical: 20}}>
-        <Button
-          color={colors.accent}
-          title="Powrót do menu"
-          onPress={() => navigation.goBack()}
-        />
-      </View>
+      
     </View>
   );
 }

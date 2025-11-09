@@ -19,14 +19,6 @@ export default function OptionsScreen({ navigation }) {
         onPress={() => {}}
       />
     </View>
-    <View style={styles.buttonContainer}>
-      <Button
-        color={colors.accent}
-        title="Powrót" 
-        onPress={() => navigation.goBack()}
-      />
-    </View>
-    
   </View>;
 }
 

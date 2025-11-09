@@ -6,19 +6,12 @@ export default function StatisticsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-      <Text style={styles.title}>Statystyki</Text>
       <Image
         source={require('../assets/wykres.jpg')}
         style={styles.image}
       />
       </View>
-      <View style={styles.buttonContainer}>
-      <Button
-          color={colors.accent}
-                title="Powrót" 
-                onPress={() => navigation.goBack()}
-              />
-      </View>
+     
   </View>
   );
 }

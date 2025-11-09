@@ -4,7 +4,6 @@ import colors from '../styles/colors';
 
 export default function EntryScreen({ navigation }) {
   return <View style={styles.container}>
-    <Text style={styles.title}>Wpisy</Text>
     <View style={styles.buttonContainer}>
       <Button
         color={colors.accent}
@@ -12,13 +11,7 @@ export default function EntryScreen({ navigation }) {
         onPress={() => {}}
       />
     </View>
-    <View style={styles.buttonContainer}>
-      <Button
-        color={colors.accent}
-        title="Powrót" 
-        onPress={() => navigation.goBack()}
-      />
-    </View>
+    
   </View>;
 }
 

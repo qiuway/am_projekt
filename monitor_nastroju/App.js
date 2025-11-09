@@ -9,6 +9,7 @@ import MeditationScreen from './screens/MeditationScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import QuoteScreen from './screens/QuoteScreen';
 import OptionsScreen from './screens/OptionsScreen';
+import MeditationSession from './screens/MeditationSession';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="Gallery" component={GalleryScreen} />
         <Stack.Screen name="Quote" component={QuoteScreen} />
         <Stack.Screen name="Options" component={OptionsScreen} />
+        <Stack.Screen name="MeditationSession" component={MeditationSession} />
       </Stack.Navigator>
     </NavigationContainer>
   );
