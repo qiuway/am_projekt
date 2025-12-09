@@ -1,18 +1,16 @@
-import React from 'react';
-//import { View, Button, StyleSheet } from 'react-native';
-//import colors from '../styles/colors';
-
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {Ionicons} from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons';
+import { ThemeContext } from '../ThemeContext';
 
-import EntryScreen from '../screens/EntryScreen'
-import GalleryScreen from '../screens/GalleryScreen'
-import MeditationScreen from '../screens/MeditationScreen'
-import OptionsScreen from '../screens/OptionsScreen'
-import QuoteScreen from '../screens/QuoteScreen'
-import StatisticsScreen from '../screens/StatisticsScreen'
+import EntryScreen from './EntryScreen';
+import GalleryScreen from './GalleryScreen';
+import MeditationScreen from './MeditationScreen';
+import QuoteScreen from './QuoteScreen';
+import StatisticsScreen from './StatisticsScreen';
+import OptionsScreen from './OptionsScreen';
 
+const Tab = createBottomTabNavigator();
 
 const EntryName = 'Wpis';
 const GalleryName = 'Galeria';
@@ -21,50 +19,41 @@ const QuoteName = 'Cytat';
 const StatisticsName = 'Statystyki';
 const OptionsName = 'Opcje';
 
-const Tab = createBottomTabNavigator(); 
+export default function HomeScreen() {
+    const { theme } = useContext(ThemeContext);
 
-
-export default function HomeScreen({ navigation }) {
-  return (
-      <Tab.Navigator
-        initialRouteName={EntryName}
-        screenOptions={({route}) => ({
-            headerShown: true,
-            tabBarIcon: ({focused, color, size}) => {
-                let iconName;
-                let rn = route.name;
-
-                if(rn === EntryName){
-                  iconName = focused ? 'book' : 'book-outline'
-                } else if (rn === GalleryName){
-                  iconName = focused ? 'images' : 'images-outline'
-                } else if (rn === MeditationName){
-                  iconName = focused ? 'moon' : 'moon-outline'
-                } else if (rn === QuoteName){
-                  iconName = focused ? 'sparkles' : 'sparkles-outline'
-                } else if (rn === StatisticsName){
-                  iconName = focused ? 'bar-chart' : 'bar-chart-outline'
-                } else if (rn === OptionsName){
-                  iconName = focused ? 'settings' : 'settings-outline'
-                }
-
-                return <Ionicons name={iconName} size={size} color='#5FA777'/>
-
-            },
-            tabBarActiveTintColor: '#5FA777', 
-            tabBarInactiveTintColor: 'gray',
-        })}>
-
-        <Tab.Screen name={EntryName} component={EntryScreen}/>
-        <Tab.Screen name={GalleryName} component={GalleryScreen}/>
-        <Tab.Screen name={MeditationName} component={MeditationScreen}/>
-        <Tab.Screen name={QuoteName} component={QuoteScreen}/>
-        <Tab.Screen name={StatisticsName} component={StatisticsScreen}/>
-        <Tab.Screen name={OptionsName} component={OptionsScreen}/>
-        
-
-      </Tab.Navigator>
-
-  );
+    return (
+        <Tab.Navigator
+            initialRouteName={EntryName}
+            screenOptions={({ route }) => ({
+                headerShown: true,
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
+                    if (route.name === EntryName) iconName = focused ? 'book' : 'book-outline';
+                    else if (route.name === GalleryName) iconName = focused ? 'images' : 'images-outline';
+                    else if (route.name === MeditationName) iconName = focused ? 'moon' : 'moon-outline';
+                    else if (route.name === QuoteName) iconName = focused ? 'sparkles' : 'sparkles-outline';
+                    else if (route.name === StatisticsName) iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+                    else if (route.name === OptionsName) iconName = focused ? 'settings' : 'settings-outline';
+                    return <Ionicons name={iconName} size={size} color={color} />;
+                },
+                tabBarActiveTintColor: theme.accent,
+                tabBarInactiveTintColor: '#888',
+                tabBarStyle: {
+                    backgroundColor: theme.background,
+                },
+                headerStyle: {
+                    backgroundColor: theme.background,
+                },
+                headerTintColor: theme.text,
+            })}
+        >
+            <Tab.Screen name={EntryName} component={EntryScreen} />
+            <Tab.Screen name={GalleryName} component={GalleryScreen} />
+            <Tab.Screen name={MeditationName} component={MeditationScreen} />
+            <Tab.Screen name={QuoteName} component={QuoteScreen} />
+            <Tab.Screen name={StatisticsName} component={StatisticsScreen} />
+            <Tab.Screen name={OptionsName} component={OptionsScreen} />
+        </Tab.Navigator>
+    );
 }
-
