@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import colors from '../styles/colors';
 
 export default function LoginScreen({ navigation }) {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [users, setUsers] = useState({});
 
-//--------------------------e-mail i hasło to "1"---------------------------------
+    useEffect(() => {
+        const loadUsers = async () => {
+            const storedUsers = await AsyncStorage.getItem('users');
+            let parsed = storedUsers ? JSON.parse(storedUsers) : {};
+            if (!parsed['1']) parsed['1'] = '1'; // domyślny użytkownik
+            await AsyncStorage.setItem('users', JSON.stringify(parsed));
+            setUsers(parsed);
+        };
+        loadUsers();
+    }, []);
 
-    const handleLogin = () => {
-        if (email === '1' && password === '1') {
+    const handleLogin = async () => {
+        if (users[username] && users[username] === password) {
+            await AsyncStorage.setItem('loggedUser', username);
             navigation.replace('Home');
         } else {
-            Alert.alert('Błąd logowania', 'Niepoprawny e-mail lub hasło');
+            Alert.alert('Błąd logowania', 'Niepoprawna nazwa użytkownika lub hasło');
         }
     };
 
@@ -21,10 +33,10 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.title}>Zaloguj się</Text>
             <TextInput
                 style={styles.input}
-                placeholder="E-mail"
+                placeholder="Nazwa użytkownika"
                 placeholderTextColor="#888"
-                value={email}
-                onChangeText={setEmail}
+                value={username}
+                onChangeText={setUsername}
                 autoCapitalize="none"
             />
             <TextInput
@@ -36,29 +48,15 @@ export default function LoginScreen({ navigation }) {
                 secureTextEntry
             />
             <Button title="Zaloguj" color={colors.accent} onPress={handleLogin} />
+            <TouchableOpacity onPress={() => navigation.navigate('Register')} style={{ marginTop: 20 }}>
+                <Text style={{ color: colors.accent, textAlign: 'center' }}>Nie masz konta? Zarejestruj się</Text>
+            </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.background,
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        color: colors.text,
-        fontSize: 24,
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    input: {
-        borderColor: colors.accent,
-        color: colors.text,
-        borderWidth: 1,
-        padding: 10,
-        borderRadius: 8,
-        marginBottom: 15,
-    },
+    container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: colors.background },
+    title: { fontSize: 24, color: colors.text, textAlign: 'center', marginBottom: 20 },
+    input: { borderWidth: 1, borderColor: colors.accent, color: colors.text, borderRadius: 8, padding: 10, marginBottom: 15 },
 });
