@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "test",
+      "password": "1234"
+    },
+    {
+      "id": "4b4e",
+      "username": "natasza",
+      "password": "4321"
+    }
+  ],
+  "entries": [
+    {
+      "userId": "4b4e",
+      "text": "Jest dobrze",
+      "hasImage": false,
+      "emotion": {
+        "label": "😄",
+        "name": "szczęśliwy"
+      },
+      "favorite": false,
+      "date": "2025-12-05T22:28:00.000Z",
+      "id": "425b"
+    },
+    {
+      "id": "b8a0",
+      "userId": 1,
+      "text": "Nie ma lipy",
+      "hasImage": true,
+      "emotion": {
+        "label": "😐",
+        "name": "neutralny"
+      },
+      "favorite": true,
+      "date": "2025-12-06T22:30:00.000Z"
+    },
+    {
+      "id": "4a62",
+      "userId": 1,
+      "text": "Jest w trabke",
+      "hasImage": false,
+      "emotion": {
+        "label": "😄",
+        "name": "szczęśliwy"
+      },
+      "favorite": false,
+      "date": "2025-12-09T22:42:42.929Z"
+    },
+    {
+      "id": "160f",
+      "userId": 1,
+      "text": "Ale jestem dzisiaj zmeczony",
+      "hasImage": false,
+      "emotion": {
+        "label": "😴",
+        "name": "zmęczony"
+      },
+      "favorite": false,
+      "date": "2025-10-23T22:43:00.000Z"
+    }
+  ]
+}

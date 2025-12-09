@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeContext } from '../ThemeContext';
+import { ThemeContext } from '../../ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
+import { getEntries } from '../api/client'; // GET z API
 
 const emotions = [
     { label: '😄', name: 'szczęśliwy' },
@@ -19,36 +20,35 @@ export default function StatisticsScreen() {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [counts, setCounts] = useState({});
     const [mode, setMode] = useState('month'); // 'month' lub 'year'
-    const animatedBars = useRef({}).current; // przechowuje Animated.Value dla każdego słupka
+    const animatedBars = useRef({}).current;
 
     const monthNames = [
         'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
         'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
     ];
 
+    // Ładowanie wpisów po wejściu na ekran
     useFocusEffect(
         React.useCallback(() => {
             loadEntries();
         }, [])
     );
 
+    // Aktualizacja statystyk przy zmianie wpisów lub okresu
     useEffect(() => {
         calculateStats();
     }, [entries, selectedMonth, selectedYear, mode]);
 
     const loadEntries = async () => {
         try {
-            const loggedUser = await AsyncStorage.getItem('loggedUser');
-            if (!loggedUser) return;
+            const user = JSON.parse(await AsyncStorage.getItem('user'));
+            if (!user) return;
 
-            const storedEntries = await AsyncStorage.getItem(`userEntries_${loggedUser}`);
-            if (storedEntries) {
-                setEntries(JSON.parse(storedEntries));
-            } else {
-                setEntries([]);
-            }
+            const data = await getEntries(user.id); // GET z API
+            setEntries(data);
         } catch (e) {
             console.log('Błąd ładowania wpisów:', e);
+            Alert.alert('Błąd', 'Nie udało się załadować wpisów.');
         }
     };
 
@@ -72,7 +72,7 @@ export default function StatisticsScreen() {
 
         setCounts(emotionCounts);
 
-        // inicjalizacja Animated.Value dla każdego słupka
+        // Animacja słupków
         emotions.forEach((emo) => {
             if (!animatedBars[emo.name]) {
                 animatedBars[emo.name] = new Animated.Value(0);
@@ -136,7 +136,7 @@ export default function StatisticsScreen() {
                 </Text>
             </TouchableOpacity>
 
-            {Object.keys(counts).length > 0 && Object.values(counts).some(v => v > 0) ? (
+            {Object.values(counts).some(v => v > 0) ? (
                 <View style={styles.chartContainer}>
                     {emotions.map((emo) => (
                         <View key={emo.name} style={styles.barColumn}>

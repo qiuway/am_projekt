@@ -1,22 +1,23 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeContext, themes } from '../ThemeContext';
+import { ThemeContext, themes } from '../../ThemeContext';
+import { changePassword, deleteAccount } from '../api/client';
 
 export default function OptionsScreen({ navigation }) {
     const { theme, setTheme } = useContext(ThemeContext);
     const [showPalette, setShowPalette] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [newPassword, setNewPassword] = useState('');
-    const [currentUser, setCurrentUser] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
 
     // Pobranie zalogowanego użytkownika
     useEffect(() => {
-        const loadCurrentUser = async () => {
-            const user = await AsyncStorage.getItem('loggedUser');
-            if (user) setCurrentUser(user);
+        const loadUser = async () => {
+            const stored = await AsyncStorage.getItem('user');
+            if (stored) setCurrentUser(JSON.parse(stored));
         };
-        loadCurrentUser();
+        loadUser();
     }, []);
 
     // Zmiana hasła
@@ -25,29 +26,28 @@ export default function OptionsScreen({ navigation }) {
             Alert.alert('Błąd', 'Hasło nie może być puste');
             return;
         }
+
         try {
-            const storedUsers = await AsyncStorage.getItem('users');
-            const users = storedUsers ? JSON.parse(storedUsers) : {};
+            await changePassword(currentUser.id, newPassword);
 
-            if (!users[currentUser]) {
-                Alert.alert('Błąd', 'Użytkownik nie istnieje');
-                return;
-            }
+            // Zaktualizuj dane zapisane lokalnie
+            const updatedUser = { ...currentUser, password: newPassword };
+            await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+            setCurrentUser(updatedUser);
 
-            users[currentUser] = newPassword;
-            await AsyncStorage.setItem('users', JSON.stringify(users));
             Alert.alert('Sukces', 'Hasło zostało zmienione');
             setModalVisible(false);
             setNewPassword('');
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            console.log(err);
             Alert.alert('Błąd', 'Nie udało się zmienić hasła');
         }
     };
 
     // Wylogowanie
     const handleLogout = async () => {
-        await AsyncStorage.removeItem('loggedUser');
+        await AsyncStorage.removeItem('user');
+        await AsyncStorage.removeItem('token');
         navigation.replace('Login');
     };
 
@@ -63,18 +63,15 @@ export default function OptionsScreen({ navigation }) {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            const storedUsers = await AsyncStorage.getItem('users');
-                            const users = storedUsers ? JSON.parse(storedUsers) : {};
+                            await deleteAccount(currentUser.id);
+                            await AsyncStorage.removeItem('user');
+                            await AsyncStorage.removeItem('token');
 
-                            if (currentUser) {
-                                delete users[currentUser];
-                                await AsyncStorage.setItem('users', JSON.stringify(users));
-                                await AsyncStorage.removeItem(`userEntries_${currentUser}`);
-                                await AsyncStorage.removeItem('loggedUser');
-                                navigation.replace('Login');
-                            }
+                            Alert.alert('Sukces', 'Konto zostało usunięte');
+                            navigation.replace('Login');
                         } catch (e) {
-                            console.log('Błąd podczas usuwania konta:', e);
+                            console.log(e);
+                            Alert.alert('Błąd', 'Nie udało się usunąć konta');
                         }
                     },
                 },

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
-import { ThemeContext } from '../ThemeContext';
+import { ThemeContext } from '../../ThemeContext';
 
 export default function GalleryScreen() {
     const { theme } = useContext(ThemeContext);
