@@ -1,10 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Accelerometer } from 'expo-sensors';
 import { ThemeContext } from '../ThemeContext';
 
 export default function QuoteScreen() {
     const { theme } = useContext(ThemeContext);
     const [quote, setQuote] = useState('');
+    const [subscription, setSubscription] = useState(null);
 
     const quotes = [
         'Nigdy nie rezygnuj z marzeń.',
@@ -21,23 +23,46 @@ export default function QuoteScreen() {
         'Masz prawo do gorszego dnia. To nie znaczy, że wszystko się sypie.'
     ];
 
-    const handlePress = () => {
+    const handleRandomQuote = () => {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         setQuote(quotes[randomIndex]);
     };
 
+    const SHAKE_THRESHOLD = 4;
+
+    const subscribe = () => {
+        setSubscription(
+            Accelerometer.addListener(acc => {
+                const totalForce =
+                    Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+
+                if (totalForce > SHAKE_THRESHOLD) {
+                    handleRandomQuote();
+                }
+            })
+        );
+        Accelerometer.setUpdateInterval(500);
+    };
+
+    const unsubscribe = () => {
+        subscription && subscription.remove();
+        setSubscription(null);
+    };
+
+    useEffect(() => {
+        subscribe();
+        return () => unsubscribe();
+    }, []);
+
     const styles = StyleSheet.create({
         container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background },
-        button: { backgroundColor: theme.accent, paddingVertical: 15, paddingHorizontal: 40, borderRadius: 30, elevation: 4 },
-        buttonText: { color: '#fff', fontSize: 18, fontWeight: '600', textTransform: 'uppercase' },
+        infoText: { color: theme.text, fontSize: 18, marginBottom: 40, opacity: 0.7 },
         quote: { color: theme.text, fontSize: 20, fontStyle: 'italic', textAlign: 'center', marginTop: 30 },
     });
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.button} onPress={handlePress}>
-                <Text style={styles.buttonText}>Wylosuj cytat</Text>
-            </TouchableOpacity>
+            <Text style={styles.infoText}>Potrząśnij, aby wylosować cytat</Text>
             {quote !== '' && <Text style={styles.quote}>{quote}</Text>}
         </View>
     );
