@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Alert, } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ThemeContext } from '../ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../../ThemeContext';
+import { getEntries, addEntry, updateEntry, deleteEntry as deleteEntryAPI } from '../api/client';
 
 const emotions = [
     { label: '😄', name: 'szczęśliwy' },
@@ -15,7 +16,7 @@ const emotions = [
 export default function EntryScreen() {
     const { theme } = useContext(ThemeContext);
 
-    const [currentUser, setCurrentUser] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
     const [entries, setEntries] = useState([]);
     const [newEntry, setNewEntry] = useState('');
     const [hasImage, setHasImage] = useState(false);
@@ -24,88 +25,61 @@ export default function EntryScreen() {
     const [sortOption, setSortOption] = useState('newest');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [filterEmotion] = useState(null);
 
-    // Pobranie aktualnie zalogowanego użytkownika
+//pobranie aktualnie zalogowanego użytkownika
     useEffect(() => {
         const loadUser = async () => {
-            const user = await AsyncStorage.getItem('loggedUser');
+            const user = JSON.parse(await AsyncStorage.getItem('user'));
             if (user) setCurrentUser(user);
         };
         loadUser();
     }, []);
 
-    // Ładowanie wpisów po ustawieniu currentUser
+//ładowanie wpisów po ustawieniu currentUser
     useEffect(() => {
         if (currentUser) loadEntries();
     }, [currentUser]);
 
     const loadEntries = async () => {
         try {
-            const storedEntries = await AsyncStorage.getItem(`userEntries_${currentUser}`);
-            if (storedEntries) setEntries(JSON.parse(storedEntries));
+            const data = await getEntries(currentUser.id);
+            setEntries(data.sort((a,b) => new Date(b.date) - new Date(a.date)));
         } catch (e) {
             console.log('Błąd ładowania wpisów:', e);
         }
     };
 
     const addOrEditEntry = async () => {
-        if (!currentUser) {
-            Alert.alert('Błąd', 'Nieprawidłowy użytkownik');
-            return;
-        }
-        if (newEntry.trim() === '') {
-            Alert.alert('Błąd', 'Wpis nie może być pusty!');
-            return;
-        }
-        if (!selectedEmotion) {
-            Alert.alert('Błąd', 'Wybierz emocję dnia!');
-            return;
-        }
+        if (!currentUser) return Alert.alert('Błąd', 'Nieprawidłowy użytkownik');
+        if (!newEntry.trim()) return Alert.alert('Błąd', 'Wpis nie może być pusty!');
+        if (!selectedEmotion) return Alert.alert('Błąd', 'Wybierz emocję dnia!');
 
-        const dateString = selectedDate.toISOString();
-        let updatedEntries;
-
-        if (editingId) {
-            updatedEntries = entries.map((entry) =>
-                entry.id === editingId
-                    ? {
-                        ...entry,
-                        text: newEntry,
-                        hasImage,
-                        emotion: selectedEmotion,
-                        date: dateString,
-                    }
-                    : entry
-            );
-            setEditingId(null);
-        } else {
-            const entry = {
-                id: Date.now().toString(),
-                text: newEntry,
-                hasImage,
-                emotion: selectedEmotion,
-                favorite: false,
-                date: dateString,
-            };
-            updatedEntries = [entry, ...entries];
-        }
-
-        setEntries(updatedEntries);
+        const entryData = {
+            userId: currentUser.id,
+            text: newEntry,
+            hasImage,
+            emotion: selectedEmotion,
+            favorite: false,
+            date: selectedDate.toISOString(),
+        };
 
         try {
-            await AsyncStorage.setItem(
-                `userEntries_${currentUser}`,
-                JSON.stringify(updatedEntries)
-            );
-        } catch (e) {
-            console.log('Błąd zapisu wpisów:', e);
-        }
+            if (editingId) {
+                const updated = await updateEntry(editingId, entryData);
+                setEntries(entries.map(e => e.id === editingId ? updated : e));
+                setEditingId(null);
+            } else {
+                const saved = await addEntry(entryData);
+                setEntries([saved, ...entries]);
+            }
 
-        setNewEntry('');
-        setHasImage(false);
-        setSelectedEmotion(null);
-        setSelectedDate(new Date());
+            setNewEntry('');
+            setHasImage(false);
+            setSelectedEmotion(null);
+            setSelectedDate(new Date());
+        } catch (e) {
+            console.log('Błąd zapisu wpisu:', e);
+        }
     };
 
     const editEntry = (entry) => {
@@ -117,49 +91,39 @@ export default function EntryScreen() {
     };
 
     const deleteEntry = async (id) => {
-        const updatedEntries = entries.filter((entry) => entry.id !== id);
-        setEntries(updatedEntries);
         try {
-            await AsyncStorage.setItem(
-                `userEntries_${currentUser}`,
-                JSON.stringify(updatedEntries)
-            );
+            await deleteEntryAPI(id);
+            setEntries(entries.filter(e => e.id !== id));
         } catch (e) {
-            console.log('Błąd zapisu wpisów:', e);
+            console.log('Błąd usuwania wpisu:', e);
         }
     };
 
     const toggleFavorite = async (id) => {
-        const updatedEntries = entries.map((entry) =>
-            entry.id === id ? { ...entry, favorite: !entry.favorite } : entry
-        );
-        setEntries(updatedEntries);
+        const entry = entries.find(e => e.id === id);
+        if (!entry) return;
+
         try {
-            await AsyncStorage.setItem(
-                `userEntries_${currentUser}`,
-                JSON.stringify(updatedEntries)
-            );
+            const updated = await updateEntry(id, { ...entry, favorite: !entry.favorite });
+            setEntries(entries.map(e => e.id === id ? updated : e));
         } catch (e) {
-            console.log('Błąd zapisu wpisów:', e);
+            console.log('Błąd togglowania ulubionego:', e);
         }
     };
 
-    const filteredEntries = filterEmotion
-        ? entries.filter((e) => e.emotion?.name === filterEmotion.name)
-        : entries;
+    let sortedEntries = [...entries];
 
-    const sortedEntries = [...filteredEntries]
-        .filter((entry) => (sortOption === 'favorites' ? entry.favorite : true))
-        .sort((a, b) => {
-            switch (sortOption) {
-                case 'oldest':
-                    return new Date(a.date) - new Date(b.date);
-                case 'emotion':
-                    return (a.emotion?.name || '').localeCompare(b.emotion?.name || '');
-                default:
-                    return new Date(b.date) - new Date(a.date);
-            }
-        });
+    switch (sortOption) {
+        case 'oldest':
+            sortedEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+            break;
+        case 'favorites':
+            sortedEntries = sortedEntries.filter(e => e.favorite);
+            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            break;
+        default:
+            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
 
     const renderItem = ({ item }) => (
         <View style={[styles.entry, { backgroundColor: theme.accent }]}>
@@ -209,15 +173,12 @@ export default function EntryScreen() {
             />
 
             <View style={styles.emotionsContainer}>
-                {emotions.map((emo) => (
+                {emotions.map(emo => (
                     <TouchableOpacity
                         key={emo.name}
                         style={[
                             styles.emotionButton,
-                            {
-                                backgroundColor:
-                                    selectedEmotion?.name === emo.name ? theme.accent : '#ccc',
-                            },
+                            { backgroundColor: selectedEmotion?.name === emo.name ? theme.accent : '#ccc' }
                         ]}
                         onPress={() => setSelectedEmotion(emo)}
                     >
@@ -258,27 +219,14 @@ export default function EntryScreen() {
                 style={[styles.mainButton, { backgroundColor: theme.accent }]}
                 onPress={addOrEditEntry}
             >
-                <Text style={styles.buttonText}>
-                    {editingId ? '💾 Zapisz zmiany' : '➕ Dodaj wpis'}
-                </Text>
+                <Text style={styles.buttonText}>{editingId ? '💾 Zapisz zmiany' : '➕ Dodaj wpis'}</Text>
             </TouchableOpacity>
 
             <View style={styles.sortBar}>
-                {['newest', 'oldest', 'favorites', 'emotion'].map((option) => (
+                {['newest', 'oldest', 'favorites'].map(option => (
                     <TouchableOpacity key={option} onPress={() => setSortOption(option)}>
-                        <Text
-                            style={[
-                                styles.sortButton,
-                                sortOption === option && { color: theme.accent },
-                            ]}
-                        >
-                            {option === 'newest'
-                                ? 'Najnowsze'
-                                : option === 'oldest'
-                                    ? 'Najstarsze'
-                                    : option === 'favorites'
-                                        ? 'Ulubione'
-                                        : null}
+                        <Text style={[styles.sortButton, sortOption === option && { color: theme.accent }]}>
+                            {option === 'newest' ? 'Najnowsze' : option === 'oldest' ? 'Najstarsze' : 'Ulubione'}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -286,7 +234,7 @@ export default function EntryScreen() {
 
             <FlatList
                 data={sortedEntries}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 contentContainerStyle={{ marginTop: 10 }}
             />
@@ -297,17 +245,17 @@ export default function EntryScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20 },
     input: { borderWidth: 1, borderRadius: 12, padding: 10, marginBottom: 12 },
-    mainButton: { paddingVertical: 14, borderRadius: 30, alignItems: 'center', marginBottom: 10, elevation: 2, },
-    smallButton: { flex: 1, paddingVertical: 8, borderRadius: 20, alignItems: 'center', marginHorizontal: 5, elevation: 1, },
+    mainButton: { paddingVertical: 14, borderRadius: 30, alignItems: 'center', marginBottom: 10, elevation: 2 },
+    smallButton: { flex: 1, paddingVertical: 8, borderRadius: 20, alignItems: 'center', marginHorizontal: 5, elevation: 1 },
     buttonText: { fontWeight: '600', fontSize: 16, color: '#fff' },
     entry: { padding: 15, borderRadius: 12, marginBottom: 12 },
-    entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', },
+    entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     entryText: { fontSize: 16, marginBottom: 5, flexShrink: 1 },
     entryDate: { fontSize: 12, fontStyle: 'italic', marginBottom: 10 },
     entryButtons: { flexDirection: 'row', justifyContent: 'space-between' },
     emotionsContainer: { flexDirection: 'row', marginBottom: 10, justifyContent: 'space-between' },
-    emotionButton: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', },
+    emotionButton: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
     entryEmotion: { fontSize: 14, marginBottom: 8 },
-    sortBar: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10, },
-    sortButton: { fontSize: 16, fontWeight: '600', color: '#666', },
+    sortBar: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 },
+    sortButton: { fontSize: 16, fontWeight: '600', color: '#666' },
 });

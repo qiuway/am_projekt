@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { View, Text, Animated, TouchableOpacity, StyleSheet } from 'react-native';
-import { ThemeContext } from '../ThemeContext';
+import { ThemeContext } from '../../ThemeContext';
 
 export default function MeditationSession({ navigation }) {
     const { theme } = useContext(ThemeContext);

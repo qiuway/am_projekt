@@ -2,16 +2,16 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ThemeProvider } from './ThemeContext';
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
-import EntryScreen from './screens/EntryScreen';
-import StatisticsScreen from './screens/StatisticsScreen';
-import MeditationScreen from './screens/MeditationScreen';
-import GalleryScreen from './screens/GalleryScreen';
-import QuoteScreen from './screens/QuoteScreen';
-import OptionsScreen from './screens/OptionsScreen';
-import MeditationSession from './screens/MeditationSession';
-import RegisterScreen from './screens/RegisterScreen'; 
+import LoginScreen from './src/screens/LoginScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import EntryScreen from './src/screens/EntryScreen';
+import StatisticsScreen from './src/screens/StatisticsScreen';
+import MeditationScreen from './src/screens/MeditationScreen';
+import GalleryScreen from './src/screens/GalleryScreen';
+import QuoteScreen from './src/screens/QuoteScreen';
+import OptionsScreen from './src/screens/OptionsScreen';
+import MeditationSession from './src/screens/MeditationSession';
+import RegisterScreen from './src/screens/RegisterScreen'; 
 
 const Stack = createStackNavigator();
 

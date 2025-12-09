@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeContext, themes } from '../ThemeContext';
+import { ThemeContext, themes } from '../../ThemeContext';
 
 export default function OptionsScreen({ navigation }) {
     const { theme, setTheme } = useContext(ThemeContext);
