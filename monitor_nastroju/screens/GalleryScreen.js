@@ -1,54 +1,47 @@
-import React from 'react';
-import { View, Button, Text, ScrollView, StyleSheet } from 'react-native';
-import colors from '../styles/colors';
+import React, { useContext } from 'react';
+import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import { ThemeContext } from '../ThemeContext';
 
-export default function GalleryScreen({ navigation }) {
-  const fakeImages = Array.from({ length: 20 }, (_, i) => i + 1);
-  return (
-    <View style={styles.container}>
+export default function GalleryScreen() {
+    const { theme } = useContext(ThemeContext);
+    const fakeImages = Array.from({ length: 20 }, (_, i) => i + 1);
 
-      <ScrollView>
-        <View style={styles.grid}>
-          {fakeImages.map((num) => (
-            <View key={num} style={styles.image}>
-              <Text style={styles.imageText}>Obraz {num}</Text>
-            </View>
-          ))}
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: 20,
+            backgroundColor: theme.background,
+        },
+        grid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+        },
+        image: {
+            backgroundColor: theme.accent,
+            width: '48%',
+            height: 120,
+            marginBottom: 15,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        imageText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+    });
+
+    return (
+        <View style={styles.container}>
+            <ScrollView>
+                <View style={styles.grid}>
+                    {fakeImages.map((num) => (
+                        <View key={num} style={styles.image}>
+                            <Text style={styles.imageText}>Obraz {num}</Text>
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
         </View>
-      </ScrollView>
-
-      
-    </View>
-  );
+    );
 }
-
-const styles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.background,
-      flex: 1,
-      justifyContent: 'center',
-      padding: 20,
-    },
-    title: {
-      color: colors.text,
-      fontSize: 24,
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-      scrollContent: {
-      flexGrow: 1,
-    },
-    grid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-    },
-    image: {
-      backgroundColor: 'white',
-      width: '48%',
-      height: 120,
-      marginBottom: 15,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-});
