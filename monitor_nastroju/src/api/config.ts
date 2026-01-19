@@ -1,1 +1,1 @@
-export const API_BASE = "http://10.0.2.2:4000"; // Android Emulator
+export const API_BASE = "http://192.168.0.112:4000"; // Android Emulator

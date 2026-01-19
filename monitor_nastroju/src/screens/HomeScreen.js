@@ -4,7 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemeContext } from '../../ThemeContext';
 
 import EntryScreen from './EntryScreen';
-import GalleryScreen from './GalleryScreen';
+// GalleryScreen usuwamy z Tab.Navigator, ale możesz zostawić import 
+// jeśli jest potrzebny w innym miejscu (np. w Stack.Navigator)
+import GalleryScreen from './GalleryScreen'; 
 import MeditationScreen from './MeditationScreen';
 import QuoteScreen from './QuoteScreen';
 import StatisticsScreen from './StatisticsScreen';
@@ -13,7 +15,6 @@ import OptionsScreen from './OptionsScreen';
 const Tab = createBottomTabNavigator();
 
 const EntryName = 'Wpis';
-const GalleryName = 'Galeria';
 const MeditationName = 'Medytacja';
 const QuoteName = 'Cytat';
 const StatisticsName = 'Statystyki';
@@ -30,11 +31,11 @@ export default function HomeScreen() {
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName;
                     if (route.name === EntryName) iconName = focused ? 'book' : 'book-outline';
-                    else if (route.name === GalleryName) iconName = focused ? 'images' : 'images-outline';
                     else if (route.name === MeditationName) iconName = focused ? 'moon' : 'moon-outline';
                     else if (route.name === QuoteName) iconName = focused ? 'sparkles' : 'sparkles-outline';
                     else if (route.name === StatisticsName) iconName = focused ? 'bar-chart' : 'bar-chart-outline';
                     else if (route.name === OptionsName) iconName = focused ? 'settings' : 'settings-outline';
+                    
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
                 tabBarActiveTintColor: theme.accent,
@@ -49,7 +50,7 @@ export default function HomeScreen() {
             })}
         >
             <Tab.Screen name={EntryName} component={EntryScreen} />
-            <Tab.Screen name={GalleryName} component={GalleryScreen} />
+            {/* Tab.Screen z Galerią został usunięty */}
             <Tab.Screen name={MeditationName} component={MeditationScreen} />
             <Tab.Screen name={QuoteName} component={QuoteScreen} />
             <Tab.Screen name={StatisticsName} component={StatisticsScreen} />

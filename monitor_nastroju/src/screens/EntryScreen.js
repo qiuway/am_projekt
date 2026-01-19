@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../../ThemeContext';
 import { getEntries, addEntry, updateEntry, deleteEntry as deleteEntryAPI } from '../api/client';
+import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native'; // 1. Import nawigacji
 
 const emotions = [
     { label: '😄', name: 'szczęśliwy' },
@@ -15,6 +17,7 @@ const emotions = [
 
 export default function EntryScreen() {
     const { theme } = useContext(ThemeContext);
+    const navigation = useNavigation(); // 2. Inicjalizacja nawigacji
 
     const [currentUser, setCurrentUser] = useState(null);
     const [entries, setEntries] = useState([]);
@@ -25,8 +28,9 @@ export default function EntryScreen() {
     const [sortOption, setSortOption] = useState('newest');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [imageUri, setImageUri] = useState(null);
 
-//pobranie aktualnie zalogowanego użytkownika
+    // ... (reszta funkcji loadUser, loadEntries, addOrEditEntry, editEntry, deleteEntry pozostaje bez zmian)
     useEffect(() => {
         const loadUser = async () => {
             const user = JSON.parse(await AsyncStorage.getItem('user'));
@@ -35,7 +39,6 @@ export default function EntryScreen() {
         loadUser();
     }, []);
 
-//ładowanie wpisów po ustawieniu currentUser
     useEffect(() => {
         if (currentUser) loadEntries();
     }, [currentUser]);
@@ -43,7 +46,7 @@ export default function EntryScreen() {
     const loadEntries = async () => {
         try {
             const data = await getEntries(currentUser.id);
-            setEntries(data.sort((a,b) => new Date(b.date) - new Date(a.date)));
+            setEntries(data.sort((a, b) => new Date(b.date) - new Date(a.date)));
         } catch (e) {
             console.log('Błąd ładowania wpisów:', e);
         }
@@ -57,7 +60,7 @@ export default function EntryScreen() {
         const entryData = {
             userId: currentUser.id,
             text: newEntry,
-            hasImage,
+            imageUri, 
             emotion: selectedEmotion,
             favorite: false,
             date: selectedDate.toISOString(),
@@ -72,8 +75,8 @@ export default function EntryScreen() {
                 const saved = await addEntry(entryData);
                 setEntries([saved, ...entries]);
             }
-
             setNewEntry('');
+            setImageUri(null);
             setHasImage(false);
             setSelectedEmotion(null);
             setSelectedDate(new Date());
@@ -82,27 +85,9 @@ export default function EntryScreen() {
         }
     };
 
-    const editEntry = (entry) => {
-        setNewEntry(entry.text);
-        setHasImage(entry.hasImage || false);
-        setSelectedEmotion(entry.emotion || null);
-        setEditingId(entry.id);
-        setSelectedDate(new Date(entry.date));
-    };
-
-    const deleteEntry = async (id) => {
-        try {
-            await deleteEntryAPI(id);
-            setEntries(entries.filter(e => e.id !== id));
-        } catch (e) {
-            console.log('Błąd usuwania wpisu:', e);
-        }
-    };
-
     const toggleFavorite = async (id) => {
         const entry = entries.find(e => e.id === id);
         if (!entry) return;
-
         try {
             const updated = await updateEntry(id, { ...entry, favorite: !entry.favorite });
             setEntries(entries.map(e => e.id === id ? updated : e));
@@ -111,51 +96,68 @@ export default function EntryScreen() {
         }
     };
 
-    let sortedEntries = [...entries];
+    const pickFromGallery = async () => {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) return Alert.alert('Brak dostępu', 'Potrzebny dostęp do galerii');
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 0.7,
+        });
+        if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+            setHasImage(true);
+        }
+    };
 
-    switch (sortOption) {
-        case 'oldest':
-            sortedEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
-            break;
-        case 'favorites':
-            sortedEntries = sortedEntries.filter(e => e.favorite);
-            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
-            break;
-        default:
-            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
+    const takePhoto = async () => {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) return Alert.alert('Brak dostępu', 'Potrzebny dostęp do aparatu');
+        const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+        if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+            setHasImage(true);
+        }
+    };
+
+    let sortedEntries = [...entries];
+    if (sortOption === 'oldest') sortedEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+    else if (sortOption === 'favorites') sortedEntries = sortedEntries.filter(e => e.favorite);
+    else sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const renderItem = ({ item }) => (
         <View style={[styles.entry, { backgroundColor: theme.accent }]}>
-            <View style={styles.entryHeader}>
-                <Text style={[styles.entryText, { color: theme.background }]}>{item.text}</Text>
-                <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
-                    <Text style={{ fontSize: 22 }}>{item.favorite ? '⭐' : '☆'}</Text>
-                </TouchableOpacity>
+            <View style={styles.entryMainContent}>
+                {item.imageUri && (
+                    <Image source={{ uri: item.imageUri }} style={styles.thumbnail} />
+                )}
+                <View style={styles.entryTextContainer}>
+                    <View style={styles.entryHeader}>
+                        <Text style={[styles.entryText, { color: theme.background }]}>{item.text}</Text>
+                        <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+                            <Text style={{ fontSize: 22 }}>{item.favorite ? '⭐' : '☆'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {item.emotion && (
+                        <Text style={[styles.entryEmotion, { color: theme.background }]}>
+                            {item.emotion.label} {item.emotion.name}
+                        </Text>
+                    )}
+                    <Text style={[styles.entryDate, { color: theme.background }]}>
+                        {new Date(item.date).toLocaleDateString('pl-PL')}
+                    </Text>
+                </View>
             </View>
-
-            {item.emotion && (
-                <Text style={[styles.entryEmotion, { color: theme.background }]}>
-                    Emocja dnia: {item.emotion.label} ({item.emotion.name})
-                </Text>
-            )}
-
-            <Text style={[styles.entryDate, { color: theme.background }]}>
-                {new Date(item.date).toLocaleDateString('pl-PL')}
-            </Text>
-
             <View style={styles.entryButtons}>
-                <TouchableOpacity
-                    style={[styles.smallButton, { backgroundColor: theme.background }]}
-                    onPress={() => editEntry(item)}
-                >
+                <TouchableOpacity style={[styles.smallButton, { backgroundColor: theme.background }]} onPress={() => {
+                    setNewEntry(item.text);
+                    setImageUri(item.imageUri || null);
+                    setSelectedEmotion(item.emotion);
+                    setEditingId(item.id);
+                    setSelectedDate(new Date(item.date));
+                }}>
                     <Text style={[styles.buttonText, { color: theme.accent }]}>Edytuj</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.smallButton, { backgroundColor: theme.background }]}
-                    onPress={() => deleteEntry(item.id)}
-                >
+                <TouchableOpacity style={[styles.smallButton, { backgroundColor: theme.background }]} onPress={() => deleteEntryAPI(item.id).then(() => setEntries(entries.filter(e => e.id !== item.id)))}>
                     <Text style={[styles.buttonText, { color: theme.accent }]}>Usuń</Text>
                 </TouchableOpacity>
             </View>
@@ -164,6 +166,7 @@ export default function EntryScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
+            {/* ... (sekcja TextInput i EmotionButtons pozostaje bez zmian) */}
             <TextInput
                 style={[styles.input, { borderColor: theme.accent, color: theme.text }]}
                 placeholder="Napisz nowy wpis..."
@@ -176,10 +179,7 @@ export default function EntryScreen() {
                 {emotions.map(emo => (
                     <TouchableOpacity
                         key={emo.name}
-                        style={[
-                            styles.emotionButton,
-                            { backgroundColor: selectedEmotion?.name === emo.name ? theme.accent : '#ccc' }
-                        ]}
+                        style={[styles.emotionButton, { backgroundColor: selectedEmotion?.name === emo.name ? theme.accent : '#ccc' }]}
                         onPress={() => setSelectedEmotion(emo)}
                     >
                         <Text style={{ fontSize: 22 }}>{emo.label}</Text>
@@ -187,10 +187,7 @@ export default function EntryScreen() {
                 ))}
             </View>
 
-            <TouchableOpacity
-                style={[styles.mainButton, { backgroundColor: theme.accent }]}
-                onPress={() => setShowDatePicker(true)}
-            >
+            <TouchableOpacity style={[styles.mainButton, { backgroundColor: theme.accent }]} onPress={() => setShowDatePicker(true)}>
                 <Text style={styles.buttonText}>📅 {selectedDate.toLocaleDateString('pl-PL')}</Text>
             </TouchableOpacity>
 
@@ -199,34 +196,46 @@ export default function EntryScreen() {
                     value={selectedDate}
                     mode="date"
                     display="default"
-                    onChange={(event, date) => {
-                        setShowDatePicker(false);
-                        if (date) setSelectedDate(date);
-                    }}
+                    onChange={(event, date) => { setShowDatePicker(false); if (date) setSelectedDate(date); }}
                 />
             )}
 
             <TouchableOpacity
                 style={[styles.mainButton, { backgroundColor: theme.accent }]}
-                onPress={() => setHasImage(!hasImage)}
+                onPress={() => Alert.alert('Dodaj zdjęcie', 'Wybierz źródło', [
+                    { text: '📷 Zrób zdjęcie', onPress: takePhoto },
+                    { text: '🖼 Wybierz z galerii', onPress: pickFromGallery },
+                    { text: 'Anuluj', style: 'cancel' },
+                ])}
             >
-                <Text style={styles.buttonText}>
-                    {hasImage ? '📸 Zdjęcie dodane' : 'Dodaj zdjęcie'}
-                </Text>
+                <Text style={styles.buttonText}>{imageUri ? '📸 Zdjęcie wybrane' : '🖼 Dodaj zdjęcie'}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.mainButton, { backgroundColor: theme.accent }]}
-                onPress={addOrEditEntry}
-            >
+            <TouchableOpacity style={[styles.mainButton, { backgroundColor: theme.accent }]} onPress={addOrEditEntry}>
                 <Text style={styles.buttonText}>{editingId ? '💾 Zapisz zmiany' : '➕ Dodaj wpis'}</Text>
             </TouchableOpacity>
 
+            {/* ZMODYFIKOWANY PASEK SORTOWANIA */}
             <View style={styles.sortBar}>
-                {['newest', 'oldest', 'favorites'].map(option => (
-                    <TouchableOpacity key={option} onPress={() => setSortOption(option)}>
-                        <Text style={[styles.sortButton, sortOption === option && { color: theme.accent }]}>
-                            {option === 'newest' ? 'Najnowsze' : option === 'oldest' ? 'Najstarsze' : 'Ulubione'}
+                {['newest', 'oldest', 'favorites', 'gallery'].map(option => (
+                    <TouchableOpacity 
+                        key={option} 
+                        onPress={() => {
+                            if (option === 'gallery') {
+                                navigation.navigate('Gallery'); // 3. Przejście do ekranu galerii
+                            } else {
+                                setSortOption(option);
+                            }
+                        }}
+                    >
+                        <Text style={[
+                            styles.sortButton, 
+                            sortOption === option && option !== 'gallery' && { color: theme.accent },
+                            option === 'gallery' && { fontWeight: 'bold' } // Wyróżnienie opcji galerii
+                        ]}>
+                            {option === 'newest' ? 'Najnowsze' : 
+                             option === 'oldest' ? 'Najstarsze' : 
+                             option === 'favorites' ? 'Ulubione' : '🖼 Galeria'}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -249,13 +258,23 @@ const styles = StyleSheet.create({
     smallButton: { flex: 1, paddingVertical: 8, borderRadius: 20, alignItems: 'center', marginHorizontal: 5, elevation: 1 },
     buttonText: { fontWeight: '600', fontSize: 16, color: '#fff' },
     entry: { padding: 15, borderRadius: 12, marginBottom: 12 },
-    entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    entryText: { fontSize: 16, marginBottom: 5, flexShrink: 1 },
-    entryDate: { fontSize: 12, fontStyle: 'italic', marginBottom: 10 },
-    entryButtons: { flexDirection: 'row', justifyContent: 'space-between' },
+    entryMainContent: { flexDirection: 'row', marginBottom: 10 },
+    thumbnail: { width: 60, height: 60, borderRadius: 8, marginRight: 12 },
+    entryTextContainer: { flex: 1 },
+    entryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    entryText: { fontSize: 16, marginBottom: 5, flexShrink: 1, fontWeight: '500' },
+    entryDate: { fontSize: 11, fontStyle: 'italic' },
+    entryButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
     emotionsContainer: { flexDirection: 'row', marginBottom: 10, justifyContent: 'space-between' },
     emotionButton: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-    entryEmotion: { fontSize: 14, marginBottom: 8 },
-    sortBar: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 },
-    sortButton: { fontSize: 16, fontWeight: '600', color: '#666' },
+    entryEmotion: { fontSize: 13, marginBottom: 4 },
+    sortBar: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10, alignItems: 'center' },
+    sortButton: { 
+    fontSize: 13, 
+    fontWeight: '600', 
+    color: '#666',
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 15,
+},
 });

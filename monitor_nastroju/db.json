@@ -61,16 +61,16 @@
       "date": "2025-10-23T22:43:00.000Z"
     },
     {
-      "id": "c1ce",
       "userId": "1",
-      "text": "teścik",
-      "hasImage": true,
+      "text": "wpis",
+      "imageUri": "file:///var/mobile/Containers/Data/Application/C4DDCB44-0C0C-4FAB-A222-E1ED31E29B48/Library/Caches/ExponentExperienceData/@anonymous/monitor_nastroju-649ce99c-33cf-40a8-8a63-0e29607b994d/ImagePicker/66AC8BC8-E071-4778-BE3E-B991E1A80ED5.heic",
       "emotion": {
-        "label": "😄",
-        "name": "szczęśliwy"
+        "label": "😡",
+        "name": "zły"
       },
       "favorite": true,
-      "date": "2026-01-19T20:34:46.004Z"
+      "date": "2026-01-02T21:29:00.000Z",
+      "id": "4da7"
     }
   ]
 }
