@@ -19,6 +19,16 @@ export const register = async (username, password) => {
     return res.data;
 };
 
+export const changePassword = async (userId, newPassword) => {
+    const res = await axios.patch(`${API_BASE}/users/${userId}`, { password: newPassword });
+    return res.data;
+};
+
+export const deleteAccount = async (userId) => {
+    const res = await axios.delete(`${API_BASE}/users/${userId}`);
+    return res.data;
+};
+
 // Pobranie wpisów użytkownika
 export const getEntries = async (userId) => {
   const res = await axios.get(`${API_BASE}/entries?userId=${userId}`);
