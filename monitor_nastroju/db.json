@@ -71,6 +71,18 @@
       "favorite": true,
       "date": "2026-01-02T21:29:00.000Z",
       "id": "4da7"
+    },
+    {
+      "userId": "1",
+      "text": "wpis 2",
+      "imageUri": "file:///var/mobile/Containers/Data/Application/C4DDCB44-0C0C-4FAB-A222-E1ED31E29B48/Library/Caches/ExponentExperienceData/@anonymous/monitor_nastroju-649ce99c-33cf-40a8-8a63-0e29607b994d/ImagePicker/A0107559-AF92-4292-ABD8-EA5E3D5B289B.heic",
+      "emotion": {
+        "label": "😢",
+        "name": "smutny"
+      },
+      "favorite": false,
+      "date": "2026-01-20T19:46:46.965Z",
+      "id": "6f0e"
     }
   ]
 }

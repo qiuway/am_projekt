@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { View, Text, Animated, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Audio } from 'expo-av'; // Import modułu audio
+import { Audio } from 'expo-av';
 import { ThemeContext } from '../../ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,12 +19,11 @@ export default function MeditationSession({ navigation, route }) {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const opacityAnim = useRef(new Animated.Value(0.4)).current;
     const timerRef = useRef(null);
-    const soundRef = useRef(null); // Ref do przechowywania obiektu dźwięku
+    const soundRef = useRef(null);
 
     // --- FUNKCJA OBSŁUGI DŹWIĘKU ---
 const loadAndPlaySound = async () => {
     try {
-        // Konfiguracja audio dla iOS/Android, aby dźwięk grał nawet w trybie cichym
         await Audio.setAudioModeAsync({
             playsInSilentModeIOS: true,
             staysActiveInBackground: false,
@@ -32,12 +31,11 @@ const loadAndPlaySound = async () => {
         });
 
         const { sound } = await Audio.Sound.createAsync(
-            // Link do bardzo spokojnego, jednostajnego szumu deszczu i natury
-            { uri: 'https://www.soundjay.com/nature/sounds/rain-07.mp3' }, 
+            require('../../assets/audio/mini-zen-drone-short-450970.mp3'), 
             { 
                 shouldPlay: true, 
                 isLooping: true, 
-                volume: 0.3 // Obniżyłem głośność do 30%, aby był tylko tłem
+                volume: 0.4 
             }
         );
         soundRef.current = sound;
