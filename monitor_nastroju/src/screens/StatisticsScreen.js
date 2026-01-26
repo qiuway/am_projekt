@@ -101,6 +101,10 @@ export default function StatisticsScreen() {
         setSelectedYear(newYear);
     };
 
+    const changeYear = (direction) => {
+        setSelectedYear((prev) => prev + direction);
+    };
+
     const changeMode = () => {
         setMode(mode === 'month' ? 'year' : 'month');
     };
@@ -108,8 +112,12 @@ export default function StatisticsScreen() {
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.header}>
-                {mode === 'month' && (
-                    <TouchableOpacity onPress={() => changeMonth(-1)}>
+                {(mode === 'month' || mode === 'year') && (
+                    <TouchableOpacity
+                        onPress={() =>
+                            mode === 'month' ? changeMonth(-1) : changeYear(-1)
+                        }
+                    >
                         <Text style={[styles.arrow, { color: theme.accent }]}>◀️</Text>
                     </TouchableOpacity>
                 )}
@@ -119,9 +127,13 @@ export default function StatisticsScreen() {
                         ? `${monthNames[selectedMonth]} ${selectedYear}`
                         : `Statystyki roczne (${selectedYear})`}
                 </Text>
-
-                {mode === 'month' && (
-                    <TouchableOpacity onPress={() => changeMonth(1)}>
+                    
+                {(mode === 'month' || mode === 'year') && (
+                    <TouchableOpacity
+                        onPress={() =>
+                            mode === 'month' ? changeMonth(1) : changeYear(1)
+                        }
+                    >
                         <Text style={[styles.arrow, { color: theme.accent }]}>▶️</Text>
                     </TouchableOpacity>
                 )}
