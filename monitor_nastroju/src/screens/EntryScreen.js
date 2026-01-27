@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../../ThemeContext';
 import { getEntries, addEntry, updateEntry, deleteEntry as deleteEntryAPI } from '../api/client';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native'; // 1. Import nawigacji
+import { useNavigation } from '@react-navigation/native';
 
 const emotions = [
     { label: '😄', name: 'szczęśliwy' },
@@ -17,7 +17,7 @@ const emotions = [
 
 export default function EntryScreen() {
     const { theme } = useContext(ThemeContext);
-    const navigation = useNavigation(); // 2. Inicjalizacja nawigacji
+    const navigation = useNavigation();
 
     const [currentUser, setCurrentUser] = useState(null);
     const [entries, setEntries] = useState([]);
@@ -30,7 +30,6 @@ export default function EntryScreen() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [imageUri, setImageUri] = useState(null);
 
-    // ... (reszta funkcji loadUser, loadEntries, addOrEditEntry, editEntry, deleteEntry pozostaje bez zmian)
     useEffect(() => {
         const loadUser = async () => {
             const user = JSON.parse(await AsyncStorage.getItem('user'));
@@ -166,7 +165,6 @@ export default function EntryScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
-            {/* ... (sekcja TextInput i EmotionButtons pozostaje bez zmian) */}
             <TextInput
                 style={[styles.input, { borderColor: theme.accent, color: theme.text }]}
                 placeholder="Napisz nowy wpis..."
@@ -215,14 +213,13 @@ export default function EntryScreen() {
                 <Text style={styles.buttonText}>{editingId ? '💾 Zapisz zmiany' : '➕ Dodaj wpis'}</Text>
             </TouchableOpacity>
 
-            {/* ZMODYFIKOWANY PASEK SORTOWANIA */}
             <View style={styles.sortBar}>
                 {['newest', 'oldest', 'favorites', 'gallery'].map(option => (
                     <TouchableOpacity 
                         key={option} 
                         onPress={() => {
                             if (option === 'gallery') {
-                                navigation.navigate('Gallery'); // 3. Przejście do ekranu galerii
+                                navigation.navigate('Gallery'); 
                             } else {
                                 setSortOption(option);
                             }
@@ -231,7 +228,7 @@ export default function EntryScreen() {
                         <Text style={[
                             styles.sortButton, 
                             sortOption === option && option !== 'gallery' && { color: theme.accent },
-                            option === 'gallery' && { fontWeight: 'bold' } // Wyróżnienie opcji galerii
+                            option === 'gallery' && { fontWeight: 'bold' }
                         ]}>
                             {option === 'newest' ? 'Najnowsze' : 
                              option === 'oldest' ? 'Najstarsze' : 

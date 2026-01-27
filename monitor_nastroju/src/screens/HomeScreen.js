@@ -4,9 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemeContext } from '../../ThemeContext';
 
 import EntryScreen from './EntryScreen';
-// GalleryScreen usuwamy z Tab.Navigator, ale możesz zostawić import 
-// jeśli jest potrzebny w innym miejscu (np. w Stack.Navigator)
-import GalleryScreen from './GalleryScreen'; 
 import MeditationScreen from './MeditationScreen';
 import QuoteScreen from './QuoteScreen';
 import StatisticsScreen from './StatisticsScreen';
@@ -50,7 +47,6 @@ export default function HomeScreen() {
             })}
         >
             <Tab.Screen name={EntryName} component={EntryScreen} />
-            {/* Tab.Screen z Galerią został usunięty */}
             <Tab.Screen name={MeditationName} component={MeditationScreen} />
             <Tab.Screen name={QuoteName} component={QuoteScreen} />
             <Tab.Screen name={StatisticsName} component={StatisticsScreen} />

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useCallback } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, FlatList, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, FlatList, TouchableOpacity, Modal} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemeContext } from '../../ThemeContext';
@@ -96,7 +96,6 @@ export default function GalleryScreen() {
                 showsVerticalScrollIndicator={false}
             />
 
-            {/* MODAL PEŁNEGO EKRANU */}
             <Modal
                 visible={modalVisible}
                 transparent={true}
@@ -154,7 +153,6 @@ const styles = StyleSheet.create({
     },
     image: { width: imageSize, height: imageSize },
     
-    // Style Modala
     modalBackground: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.95)',

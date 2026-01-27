@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { View, Text, Animated, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Animated, TouchableOpacity, StyleSheet} from 'react-native';
 import { Audio } from 'expo-av';
 import { ThemeContext } from '../../ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +21,7 @@ export default function MeditationSession({ navigation, route }) {
     const timerRef = useRef(null);
     const soundRef = useRef(null);
 
-    // --- FUNKCJA OBSŁUGI DŹWIĘKU ---
+    //Funkcja obsługi dżwięku
 const loadAndPlaySound = async () => {
     try {
         await Audio.setAudioModeAsync({
